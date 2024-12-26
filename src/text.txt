@@ -1,0 +1,30 @@
+     import React from 'react';
+     import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+     import ProtectedRoute from './ProtectedRoute';
+     import Home from './Home';
+     import Photos from './Photos';
+     import CreatePhoto from './CreatePhoto';
+     import Detail from './Detail';
+     import SignIn from './SignIn';
+     import Register from './Register';
+     import NotFound from './NotFound';
+
+     function App() {
+       return (
+         <Router>
+           <Routes>
+             <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>}>
+               <Route index element={<Photos />} />
+               <Route path="create" element={<CreatePhoto />} />
+               <Route path="photo/:id" element={<Detail />} />
+             </Route>
+             <Route path="/signin" element={<SignIn />} />
+             <Route path="/register" element={<Register />} />
+             <Route path="*" element={<NotFound />} />
+           </Routes>
+         </Router>
+       );
+     }
+
+     export default App;
+     ```
