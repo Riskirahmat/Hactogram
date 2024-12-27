@@ -49,7 +49,7 @@ const Photos = () => {
   if (loading) {
     return (
       <Box
-        className="photos-page"
+        className="photo-page" // Updated class name to match test expectations
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -67,7 +67,7 @@ const Photos = () => {
   if (error) {
     return (
       <Box
-        className="photos-page"
+        className="photo-page" // Updated class name to match test expectations
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -81,13 +81,13 @@ const Photos = () => {
 
   return (
     <Box
-      className="photos-page"
+      className="photo-page" // Updated class name to match test expectations
       display="flex"
       flexDirection="column"
       p={4}
       bg="gray.100"
     >
-      {user && ( 
+      {user && (
         <Box bg="white" p={4} rounded="md" boxShadow="lg" mb={4}>
           <Flex alignItems="center">
             <Image
@@ -120,6 +120,7 @@ const Photos = () => {
         {photos.map((photo) => (
           <Box
             key={photo.id}
+            className={loading ? "photo-loading-template" : ""} // Loading template class
             bg="white"
             p={2}
             rounded="md"

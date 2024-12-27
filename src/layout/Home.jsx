@@ -1,67 +1,52 @@
 import React, { useEffect } from "react";
-import { Box, Button, useToast } from "@chakra-ui/react";
-import { useNavigate, Outlet, Link } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { Button, Box, VStack, Container, Heading } from "@chakra-ui/react";
 
-const Home = () => {
+function Home() {
   const navigate = useNavigate();
-  const toast = useToast();
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    toast({
-      title: "Logout Successful",
-      description: "You have been logged out.",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-    navigate("/signin");
-  };
 
   useEffect(() => {
-    const userId = localStorage.getItem("user");
-    if (!userId) {
+    const user = localStorage.getItem("user");
+    if (!user) {
       navigate("/signin");
     }
   }, [navigate]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/signin");
+  };
+
   return (
-    <Box display="flex" height="100vh">
-      <Box bg="gray.200" p={4} width="200px" borderRight="1px solid gray.300">
-        <Button
-          as={Link}
-          to="/"
-          data-testid="home-button"
-          colorScheme="blue"
-          mb={3}
-          width="full"
-        >
-          Home
-        </Button>
-        <Button
-          as={Link}
-          to="/create/"
-          data-testid="create-button"
-          colorScheme="green"
-          mb={3}
-          width="full"
-        >
-          Create
-        </Button>
-        <Button
-          data-testid="logout-button"
-          colorScheme="red"
-          width="full"
-          onClick={handleLogout}
-        >
-          Log Out
-        </Button>
+    <Container maxW="container.lg" display="flex" flexDirection="row">
+      <Box w="250px" bg="gray.100" p={4} borderRadius="md">
+        <VStack spacing={4} align="stretch">
+          <Button data-testid="home-button" onClick={() => navigate("/")}>
+            Home
+          </Button>
+          <Button
+            data-testid="create-button"
+            onClick={() => navigate("/create")}
+          >
+            Create
+          </Button>
+          <Button
+            data-testid="logout-button"
+            colorScheme="red"
+            onClick={handleLogout}
+          >
+            Log out
+          </Button>
+        </VStack>
       </Box>
-      <Box flex={1} p={4}>
+      <Box flex="1" p={4}>
+        <Heading size="lg" mb={4}>
+          Welcome to Hacktogram
+        </Heading>
         <Outlet />
       </Box>
-    </Box>
+    </Container>
   );
-};
+}
 
 export default Home;

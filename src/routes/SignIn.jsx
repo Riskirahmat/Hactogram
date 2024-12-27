@@ -1,139 +1,69 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Flex,
-  Heading,
-  Input,
-  Button,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { Button, Input, VStack, Container } from "@chakra-ui/react";
 
-const SignIn = () => {
+function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const toast = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
+  const handleSignIn = async () => {
     try {
-      const response = await fetch("http://localhost:3001/users", {
-        method: "GET",
-      });
+      // Melakukan fetch untuk mendapatkan data pengguna
+      const response = await fetch("http://localhost:3001/users");
 
+      // Check if the response is valid
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Failed to fetch users");
       }
 
-      const users = await response.json();
+      const users = await response.json(); // Parse the JSON response
       const user = users.find(
         (u) => u.username === username && u.password === password
       );
 
+      // Jika pengguna ditemukan, simpan di localStorage dan arahkan ke halaman beranda
       if (user) {
-        localStorage.setItem("userId", user.id);
-        toast({
-          title: "Login Successful",
-          description: `Welcome, ${user.fullname}`,
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
+        localStorage.setItem("user", JSON.stringify(user));
         navigate("/");
-        console.log(navigate);
       } else {
-        setError("Invalid Username or Password");
-        toast({
-          title: "Login Failed",
-          description: "Invalid Username or Password",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+        // Jika kredensial salah, tampilkan alert
+        alert("Invalid Username or Password");
       }
     } catch (error) {
-      console.error("Error during login:", error);
-      setError("An error occurred. Please try again later.");
-      toast({
-        title: "Login Failed",
-        description: "An error occurred. Please try again later.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      console.error(error);
+      alert("There was an error signing in. Please try again later.");
     }
   };
 
   return (
-    <Box
-      className="signin-page"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="100vh"
-      bg="gray.100"
-    >
-      <Flex
-        direction="column"
-        p={6}
-        bg="white"
-        rounded="md"
-        boxShadow="lg"
-        width="300px"
-      >
-        <Heading mb={4} textAlign="center" fontSize="2xl">
+    <Container className="signin-page" centerContent>
+      <VStack spacing={4}>
+        <Input
+          data-testid="username"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <Input
+          data-testid="password"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Button data-testid="signin-button" onClick={handleSignIn}>
           Sign In
-        </Heading>
-        <form onSubmit={handleSubmit}>
-          <Input
-            data-testid="username"
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            mb={3}
-            variant="filled"
-          />
-          <Input
-            data-testid="password"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            mb={3}
-            variant="filled"
-          />
-          {error && (
-            <Text color="red.500" mb={3}>
-              {error}
-            </Text>
-          )}
-          <Button
-            data-testid="signin-button"
-            type="submit"
-            colorScheme="blue"
-            mb={3}
-            width="full"
-          >
-            Sign In
-          </Button>
-          <Button
-            data-testid="register-button"
-            colorScheme="green"
-            width="full"
-            onClick={() => navigate("/register")}
-          >
-            Register
-          </Button>
-        </form>
-      </Flex>
-    </Box>
+        </Button>
+        <Button
+          data-testid="register-button"
+          onClick={() => navigate("/register")}
+        >
+          Register
+        </Button>
+      </VStack>
+    </Container>
   );
-};
+}
 
 export default SignIn;
