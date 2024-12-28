@@ -9,25 +9,21 @@ function SignIn() {
 
   const handleSignIn = async () => {
     try {
-      // Melakukan fetch untuk mendapatkan data pengguna
       const response = await fetch("http://localhost:3001/users");
 
-      // Check if the response is valid
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
 
-      const users = await response.json(); // Parse the JSON response
+      const users = await response.json(); 
       const user = users.find(
         (u) => u.username === username && u.password === password
       );
 
-      // Jika pengguna ditemukan, simpan di localStorage dan arahkan ke halaman beranda
       if (user) {
         localStorage.setItem("user", JSON.stringify(user));
         navigate("/");
       } else {
-        // Jika kredensial salah, tampilkan alert
         alert("Invalid Username or Password");
       }
     } catch (error) {

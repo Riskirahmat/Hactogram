@@ -16,12 +16,15 @@ function Detail() {
     fetchPhoto();
   }, [id]);
 
-  const handleDelete = async () => {
-    await fetch(`http://localhost:3001/photos/${id}`, {
-      method: "DELETE",
-    });
-    navigate("/");
-  };
+const handleDelete = async () => {
+  await fetch(`http://localhost:3001/photos/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json", 
+    },
+  });
+  navigate("/");
+};
 
   if (!photo) return <Text>Loading...</Text>;
 

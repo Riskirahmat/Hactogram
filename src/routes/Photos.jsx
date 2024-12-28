@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Flex, Image, Text, Spinner, useToast } from "@chakra-ui/react";
+import { Box, Flex, Image, Text, Skeleton, useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 const Photos = () => {
@@ -49,7 +49,7 @@ const Photos = () => {
   if (loading) {
     return (
       <Box
-        className="photo-page" // Updated class name to match test expectations
+        className="photo-page"
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -57,8 +57,8 @@ const Photos = () => {
         bg="gray.100"
       >
         <Flex direction="column" alignItems="center">
-          <Spinner size="xl" color="blue.500" mb={4} />
-          <Text>Loading...</Text>
+          <Skeleton height="20px" width="200px" mb={4} />
+          <Skeleton height="20px" width="150px" />
         </Flex>
       </Box>
     );
@@ -67,7 +67,7 @@ const Photos = () => {
   if (error) {
     return (
       <Box
-        className="photo-page" // Updated class name to match test expectations
+        className="photo-page"
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -81,7 +81,7 @@ const Photos = () => {
 
   return (
     <Box
-      className="photo-page" // Updated class name to match test expectations
+      className="photo-page"
       display="flex"
       flexDirection="column"
       p={4}
@@ -117,31 +117,47 @@ const Photos = () => {
       )}
 
       <Box display="flex" flexWrap="wrap" justifyContent="space-between">
-        {photos.map((photo) => (
-          <Box
-            key={photo.id}
-            className={loading ? "photo-loading-template" : ""} // Loading template class
-            bg="white"
-            p={2}
-            rounded="md"
-            boxShadow="lg"
-            mb={4}
-            mr={4}
-            width="calc(33.333% - 16px)"
-            cursor="pointer"
-            onClick={() => navigate(`/photo/${photo.id}`)}
-          >
-            <Image
-              src={photo.url}
-              alt={photo.caption}
-              borderRadius="md"
-              width="100%"
-              height="auto"
-              data-testid={`test-image-${photo.id}`}
-            />
-          </Box>
-        ))}
-        {photos.length === 0 && (
+        {loading
+          ? Array.from({ length: 3 }).map((_, index) => (
+              <Box
+                key={index}
+                className="photo-loading-template"
+                bg="white"
+                p={2}
+                rounded="md"
+                boxShadow="lg"
+                mb={4}
+                mr={4}
+                width="calc(33.333% - 16px)"
+              >
+                <Skeleton height="200px" width="100%" />
+              </Box>
+            ))
+          : photos.map((photo) => (
+              <Box
+                key={photo.id}
+                className=""
+                bg="white"
+                p={2}
+                rounded="md"
+                boxShadow="lg"
+                mb={4}
+                mr={4}
+                width="calc(33.333% - 16px)"
+                cursor="pointer"
+                onClick={() => navigate(`/photo/${photo.id}`)}
+              >
+                <Image
+                  src={photo.url}
+                  alt={photo.caption}
+                  borderRadius="md"
+                  width="100%"
+                  height="auto"
+                  data-testid={`test-image-${photo.id}`}
+                />
+              </Box>
+            ))}
+        {photos.length === 0 && !loading && (
           <Box bg="white" p={4} rounded="md" boxShadow="lg" mb={4} width="100%">
             <Text textAlign="center" color="gray.500">
               No photos available
