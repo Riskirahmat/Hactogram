@@ -1,63 +1,90 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, VStack, Container } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Container,
+  FormControl,
+  FormLabel,
+  Input,
+  AbsoluteCenter,
+} from "@chakra-ui/react";
 
 function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (e) => {
+    e.preventDefault();
     try {
       const response = await fetch("http://localhost:3001/users");
+      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch users");
-      }
+      const userData = data.filter((obj) => obj.username === username);
 
-      const users = await response.json(); 
-      const user = users.find(
-        (u) => u.username === username && u.password === password
-      );
-
-      if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
+      if (
+        data.some(
+          (user) => user.username === username && user.password === password
+        )
+      ) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            username,
+            id: userData[0].id,
+            fullname: userData[0].fullname,
+            desc: userData[0].desc,
+            profilePic: userData[0].profilePic,
+          })
+        );
         navigate("/");
       } else {
         alert("Invalid Username or Password");
       }
     } catch (error) {
-      console.error(error);
-      alert("There was an error signing in. Please try again later.");
+      console.log(error);
     }
   };
 
   return (
     <Container className="signin-page" centerContent>
-      <VStack spacing={4}>
-        <Input
-          data-testid="username"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <Input
-          data-testid="password"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button data-testid="signin-button" onClick={handleSignIn}>
+      <form onSubmit={handleSignIn}>
+        <FormControl mb={4}>
+          <FormLabel>Username</FormLabel>
+          <Input
+            data-testid="username"
+            placeholder="Username"
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </FormControl>
+        <FormControl mb={4}>
+          <FormLabel>Password</FormLabel>
+          <Input
+            data-testid="password"
+            type="password"
+            placeholder="Password"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </FormControl>
+
+        <Button type="submit" data-testid="signin-button">
           Sign In
         </Button>
+        <Box position="relative" padding="10">
+          <AbsoluteCenter bg="transparent" px="4">
+            Don't have an account?
+          </AbsoluteCenter>
+        </Box>
         <Button
           data-testid="register-button"
           onClick={() => navigate("/register")}
         >
           Register
         </Button>
-      </VStack>
+      </form>
     </Container>
   );
 }
