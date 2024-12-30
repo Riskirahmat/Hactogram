@@ -1,83 +1,49 @@
-import React, { useEffect, useState } from "react";
-import { Box, Flex, Image, Text, Skeleton, useToast } from "@chakra-ui/react";
+import { SimpleGrid, Image, Text, Flex, Box } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const PhotosTemplate = () => {
+  return (
+    <SimpleGrid columns={3} spacing={1}>
+      {[...Array(3)].map((_, i) => (
+        <Box
+          key={i}
+          boxSize={"308px"}
+          bgColor={"gray.100"}
+          className="photo-loading-template"
+        />
+      ))}
+    </SimpleGrid>
+  );
+};
+
 const Photos = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
   const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const toast = useToast();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const loadPhotos = async (userData) => {
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:3001/photos?userId=" + userData.id
+      );
+      const data = await response.json();
+      setPhotos(data);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userResponse = await fetch("http://localhost:3001/users");
-        if (!userResponse.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-        const userData = await userResponse.json();
-        setUser(userData);
+    const userData = JSON.parse(localStorage.getItem("user"));
+    setUser(userData);
 
-        const photosResponse = await fetch("http://localhost:3001/photos");
-        if (!photosResponse.ok) {
-          throw new Error("Failed to fetch photos");
-        }
-        const photosData = await photosResponse.json();
-        const userPhotos = photosData.filter(
-          (photo) => photo.userId === userData.id
-        );
-        setPhotos(userPhotos);
-      } catch (error) {
-        setError("Failed to fetch data");
-        toast({
-          title: "Fetch Error",
-          description: "Failed to fetch data",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [navigate]);
-
-  if (loading) {
-    return (
-      <Box
-        className="photo-page"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-        bg="gray.100"
-      >
-        <Flex direction="column" alignItems="center">
-          <Skeleton height="20px" width="200px" mb={4} />
-          <Skeleton height="20px" width="150px" />
-        </Flex>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box
-        className="photo-page"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-        bg="gray.100"
-      >
-        <Text color="red.500">{error}</Text>
-      </Box>
-    );
-  }
+    loadPhotos(userData);
+  }, []);
 
   return (
     <Box
@@ -87,84 +53,52 @@ const Photos = () => {
       p={4}
       bg="gray.100"
     >
-      {user && (
-        <Box bg="white" p={4} rounded="md" boxShadow="lg" mb={4}>
-          <Flex alignItems="center">
-            <Image
-              src={user.profilePic}
-              alt={`${user.fullname}'s Profile Picture`}
-              borderRadius="full"
-              boxSize="100px"
-              mr={4}
-              loading="lazy"
-            />
-            <Box>
-              <Text fontSize="xl" fontWeight="bold">
-                {user.fullname}
-              </Text>
-              <Text fontSize="md" color="gray.500">
-                @{user.username}
-              </Text>
-              <Text fontSize="sm" color="gray.600">
-                {user.desc}
-              </Text>
-              <Text fontSize="sm" color="gray.600">
-                {photos.length} Posts
-              </Text>
-            </Box>
-          </Flex>
+      <Flex alignItems="center">
+        <Image
+          src={user.profilePic}
+          alt={`${user.fullname}'s Profile Picture`}
+          borderRadius="full"
+          boxSize="100px"
+          mr={4}
+          loading="lazy"
+        />
+        <Box>
+          <Text fontSize="xl" fontWeight="bold">
+            {user.fullname}
+          </Text>
+          <Text fontSize="md" color="gray.500">
+            {user.username}
+          </Text>
+          <Text fontSize="sm" color="gray.600">
+            {user.desc}
+          </Text>
+          <Text fontSize="sm" color="gray.600">
+            <span style={{ fontWeight: "bold" }}>{photos.length}</span>{" "}
+            {photos.length > 1 ? "Posts" : "Post"}
+          </Text>
         </Box>
+      </Flex>
+      {loading ? (
+        <PhotosTemplate />
+      ) : (
+        <SimpleGrid columns={3} spacing={1}>
+          {photos.map((photo) => (
+            <Box
+              key={photo.id}
+              cursor="pointer"
+              onClick={() => navigate(`/photo/${photo.id}`)}
+            >
+              <Image
+                boxSize={"308px"}
+                src={photo.url}
+                alt={photo.caption}
+                height="auto"
+                data-testid={`test-image-${photo.id}`}
+              />
+            </Box>
+          ))}
+        </SimpleGrid>
       )}
-
-      <Box display="flex" flexWrap="wrap" justifyContent="space-between">
-        {loading
-          ? Array.from({ length: 3 }).map((_, index) => (
-              <Box
-                key={index}
-                className="photo-loading-template"
-                bg="white"
-                p={2}
-                rounded="md"
-                boxShadow="lg"
-                mb={4}
-                mr={4}
-                width="calc(33.333% - 16px)"
-              >
-                <Skeleton height="200px" width="100%" />
-              </Box>
-            ))
-          : photos.map((photo) => (
-              <Box
-                key={photo.id}
-                className=""
-                bg="white"
-                p={2}
-                rounded="md"
-                boxShadow="lg"
-                mb={4}
-                mr={4}
-                width="calc(33.333% - 16px)"
-                cursor="pointer"
-                onClick={() => navigate(`/photo/${photo.id}`)}
-              >
-                <Image
-                  src={photo.url}
-                  alt={photo.caption}
-                  borderRadius="md"
-                  width="100%"
-                  height="auto"
-                  data-testid={`test-image-${photo.id}`}
-                />
-              </Box>
-            ))}
-        {photos.length === 0 && !loading && (
-          <Box bg="white" p={4} rounded="md" boxShadow="lg" mb={4} width="100%">
-            <Text textAlign="center" color="gray.500">
-              No photos available
-            </Text>
-          </Box>
-        )}
-      </Box>
     </Box>
   );
 };
